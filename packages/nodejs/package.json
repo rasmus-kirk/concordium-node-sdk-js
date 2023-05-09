@@ -57,6 +57,7 @@
         "lint-fix": "yarn --silent lint --fix; exit 0",
         "test": "jest",
         "build": "rm -rf grpc; mkdir -p grpc; yarn generate && tsc",
+        "build-ci": "rm -rf grpc; mkdir -p grpc; yarn generate && tsc",
         "build-dev": "tsc"
     },
     "dependencies": {

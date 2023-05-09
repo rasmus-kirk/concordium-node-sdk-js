@@ -40,6 +40,13 @@ jobs:
             ./packages/rust-bindings/target/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Cache yarn
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/node_modules/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock') }}
+
       - run: du ./packages/rust-bindings
 
       - name: Get dependencies
@@ -54,7 +61,7 @@ jobs:
           version: 'latest'
 
       - name: Build
-        run: yarn build
+        run: yarn build-ci
 
   typecheck-examples:
     runs-on: ubuntu-latest
@@ -70,19 +77,12 @@ jobs:
             node-version: ${{ env.NODE_VERSION }}
             cache: yarn
 
-      - name: Get dependencies
-        run: yarn install --immutable
-
-      - name: Install rust
-        run: rustup default ${{ env.RUST_CLIPPY }}
-
-      - name: Get wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
+      - name: Cache yarn
+        uses: actions/cache@v3
         with:
-          version: 'latest'
-
-      - name: Build
-        run: yarn build
+          path: |
+            ~/node_modules/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock') }}
 
       - name: typecheck (examples-1f5c57?)
         run: yarn workspace examples-1f5c57 typecheck

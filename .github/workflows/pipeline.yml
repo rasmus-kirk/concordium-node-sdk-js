@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ env.NODE_VERSION }}"
+          node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
       - name: Cache rust
@@ -65,7 +65,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-            node-version: "${{ env.NODE_VERSION }}"
+            node-version: ${{ env.NODE_VERSION }}
             cache: yarn
 
       - name: Get dependencies
@@ -85,7 +85,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-            node-version: "{{ env.NODE_VERSION }}"
+            node-version: ${{ env.NODE_VERSION }}
             cache: yarn
 
       - name: Get dependencies
@@ -107,7 +107,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "{{ env.NODE_VERSION }}"
+          node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
       - name: Get dependencies

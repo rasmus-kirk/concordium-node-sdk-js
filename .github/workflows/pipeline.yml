@@ -173,7 +173,7 @@ jobs:
 
   rust_lint_clippy:
     name: rust:lint:clippy
-    needs: "rust_lint_fmt"
+    needs: [rust_lint_fmt, build]
     # Don't run on draft pull requests
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest

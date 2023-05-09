@@ -43,7 +43,7 @@
     },
     "scripts": {
         "generate-ts-v2": "yarn run grpc_tools_node_protoc --plugin=protoc-gen-ts=../../node_modules/@protobuf-ts/plugin/bin/protoc-gen-ts --ts_opt 'optimize_code_size,output_legacy_commonjs,output_javascript' --ts_out=grpc -I ../../deps/concordium-base/concordium-grpc-api ../../deps/concordium-base/concordium-grpc-api/v2/concordium/*.proto",
-        "generate": "([ -e \"../../deps/concordium-base/concordium-grpc-api\" ] && yarn generate-ts-v2) || echo 'Please checkout submodules before building'",
+        "generate": "mkdir -p grpc && ([ -e \"../../deps/concordium-base/concordium-grpc-api\" ] && yarn generate-ts-v2) || echo 'Please checkout submodules before building'",
         "lint": "eslint . --cache --ext .ts,.tsx --max-warnings 0",
         "lint-fix": "yarn --silent lint --fix; exit 0",
         "test": "jest",

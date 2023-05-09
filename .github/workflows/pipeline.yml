@@ -11,8 +11,8 @@ on:
     workflow_dispatch:
 
 env:
-  NODE_VERSION: 14.16.0
-  RUST_VERSION: 1.62
+  NODE_VERSION: 18.16.0
+  RUST_VERSION: nightly-2022-06-09-x86_64-unknown-linux-gnu #1.62
   RUST_FMT: nightly-2022-06-09-x86_64-unknown-linux-gnu
 
 jobs:
@@ -36,38 +36,41 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             ./packages/rust-bindings/target/
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Cache yarn
+        id: cache-yarn
         uses: actions/cache@v3
         with:
           path: |
-            ./node_modules/
+            ./node_modules
             ./packages/rust-bindings/pkg
             ./packages/common/grpc
             ./packages/common/lib
             ./packages/nodejs/grpc
             ./packages/nodejs/lib
             ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock') }}
-
-      - run: du .
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
 
       - name: Get dependencies
         run: yarn install --immutable
 
       - name: Install rust
-        run: rustup default ${{ env.RUST_CLIPPY }}
+        run: rustup default ${{ env.RUST_VERSION }}
 
       - name: Get wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: 'latest'
 
-      - name: Build
-        run: yarn build:ci
+      - name: Build GRPC bindings
+        if: steps.cache-yarn.outputs.cache-hit != 'true'
+        run: |
+          yarn workspace @concordium/common-sdk generate
+          yarn workspace @concordium/node-sdk generate
 
-      - run: du .
+      - name: Build
+        run: yarn build:dev
 
   typecheck-examples:
     runs-on: ubuntu-latest
@@ -77,64 +80,54 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-            node-version: ${{ env.NODE_VERSION }}
-            cache: yarn
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
       - name: Cache yarn
         uses: actions/cache@v3
         with:
           path: |
-            ./node_modules/
+            ./node_modules
             ./packages/rust-bindings/pkg
             ./packages/common/grpc
             ./packages/common/lib
             ./packages/nodejs/grpc
             ./packages/nodejs/lib
             ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock') }}
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
 
       - name: Get dependencies
         run: yarn install --immutable
-
-      - run: du ./
 
       - name: typecheck (examples-1f5c57?)
         run: yarn workspace examples-1f5c57 typecheck
 
   lint:
     runs-on: ubuntu-latest
-    needs: build
+    #needs: build
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-node@v3
         with:
-            node-version: ${{ env.NODE_VERSION }}
-            cache: yarn
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
 
-      - name: Cache yarn
-        uses: actions/cache@v3
-        with:
-          path: |
-            ./node_modules/
-            ./packages/rust-bindings/pkg
-            ./packages/common/grpc
-            ./packages/common/lib
-            ./packages/nodejs/grpc
-            ./packages/nodejs/lib
-            ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock') }}
+      #- name: Cache yarn
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: |
+      #      ./node_modules
+      #      ./packages/rust-bindings/pkg
+      #      ./packages/common/grpc
+      #      ./packages/common/lib
+      #      ./packages/nodejs/grpc
+      #      ./packages/nodejs/lib
+      #      ./packages/web/lib
+      #    key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
 
-      - name: Cache lint
-        uses: actions/cache@v3
-        with:
-          path: |
-            ./.eslintcache
-            ./examples/.eslintcache
-            ./packages/common/.eslintcache
-            ./packages/nodejs/.eslintcache
-            ./packages/web/.eslintcache
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock') }}
+      - name: Lint
+        run: yarn install --immutable
 
       - name: Lint
         run: yarn lint
@@ -157,25 +150,22 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./node_modules/
+            ./node_modules
             ./packages/rust-bindings/pkg
             ./packages/common/grpc
             ./packages/common/lib
             ./packages/nodejs/grpc
             ./packages/nodejs/lib
             ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock') }}
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
 
       - name: Get dependencies
         run: yarn install --immutable
 
-      - name: test
+      - name: Run Tests
         run: yarn test
 
   rust_lint_fmt:
-    name: rust:lint:fmt
-    # Don't run on draft pull requests
-    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -184,22 +174,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@b44cb146d03e8d870c57ab64b80f04586349ca5d
-        with:
-          toolchain: ${{ env.RUST_FMT }}
-
       - name: Install formatter
-        run: rustup component add rustfmt
+        run: |
+          rustup default ${{ env.RUST_FMT }}
+          rustup component add rustfmt
 
       - name: Format
         run: cargo fmt -- --color=always --check
 
   rust_lint_clippy:
-    name: rust:lint:clippy
-    needs: [rust_lint_fmt, build]
-    # Don't run on draft pull requests
-    if: ${{ !github.event.pull_request.draft }}
+    needs: rust_lint_fmt
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -207,10 +191,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with: 
+        with:
           submodules: "recursive"
 
-      - name: Cache rust
+      - name: Cache clippy
         uses: actions/cache@v3
         with:
           path: |
@@ -218,12 +202,12 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             ./packages/rust-bindings/target/
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@b44cb146d03e8d870c57ab64b80f04586349ca5d
-        with:
-          toolchain: ${{ env.RUST_FMT }}
+      - name: Install clippy
+        run: |
+          rustup default ${{ env.RUST_FMT }}
+          rustup component add clippy
 
       - name: Clippy
         run: |

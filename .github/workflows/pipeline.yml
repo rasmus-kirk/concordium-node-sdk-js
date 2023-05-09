@@ -11,126 +11,204 @@ on:
     workflow_dispatch:
 
 env:
+  NODE_VERSION: 14.16.0
+  RUST_VERSION: 1.62
+  UBUNTU_VERSION: ubuntu-latest #ubuntu-20.04
   RUST_FMT: nightly-2022-06-09-x86_64-unknown-linux-gnu
-  RUST_CLIPPY: 1.62
 
 jobs:
-    build:
-        runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v2
-              with:
-                  submodules: "recursive"
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          submodules: "recursive"
 
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14.16.0"
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "${{ env.NODE_VERSION }}"
+          cache: yarn
 
-            - name: Get dependencies
-              run: yarn
+      - name: Cache rust
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            packages/rust-bindings/target/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
-            - name: Install rust
-              run: rustup default 1.62
+      - name: Get dependencies
+        run: yarn install --immutable --immutable-cache
 
-            - name: Get wasm-pack
-              uses: jetli/wasm-pack-action@v0.3.0
-              with:
-                  version: 'latest'
+      - name: Install rust
+        run: rustup default ${{ env.RUST_CLIPPY }}
 
-            - name: Build
-              run: yarn build
+      - name: Get wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: 'latest'
 
+      - name: Build
+        run: yarn build:dev
 
-    lint:
-        runs-on: ubuntu-20.04
+  typecheck-examples:
+    runs-on: ubuntu-latest
+    needs: [build]
 
-        steps:
-            - uses: actions/checkout@v2
-              with:
-                  submodules: "recursive"
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14.16.0"
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+            submodules: "recursive"
 
-            - name: Get dependencies
-              run: yarn
+      - uses: actions/setup-node@v2
+        with:
+            node-version: "${{ env.NODE_VERSION }}"
+            cache: yarn
 
-            - name: Lint
-              run: yarn lint
+      - name: Get dependencies
+        run: yarn install --immutable --immutable-cache
 
+      - name: typecheck
+        run: yarn workspace examples-1f5c57 typecheck
 
-    common_test:
-            runs-on: ubuntu-20.04
-            defaults:
-              run:
-                working-directory: packages/common
-            steps:
-              - uses: actions/checkout@v2
-                with:
-                  submodules: "recursive"
-              - uses: actions/setup-node@v2
-                with:
-                  node-version: "14.16.0"
-              - name: Get dependencies
-                run: yarn
-              - name: Install rust
-                run: rustup default 1.62
-              - name: Get wasm-pack
-                uses: jetli/wasm-pack-action@v0.3.0
-                with:
-                    version: 'latest'
-              - name: build rust-bindings
-                run: yarn build:rust-bindings --dev
-              - name: generate grpc
-                run: mkdir grpc; yarn generate
-              - name: test
-                run: yarn test
+  lint:
+    runs-on: ubuntu-latest
+    needs: [build]
 
-    rust_lint_fmt:
-      name: rust:lint:fmt
-      # Don't run on draft pull requests
-      if: ${{ !github.event.pull_request.draft }}
-      runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: packages/rust-bindings
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-        - name: Install Rust
-          uses: actions-rs/toolchain@v1
-          with:
-            profile: minimal
-            toolchain: ${{ env.RUST_FMT }}
-            override: true
-            components: rustfmt
-        - name: Format
-          run: |
-            cargo fmt -- --color=always --check
-    rust_lint_clippy:
-      name: rust:lint:clippy
-      needs: "rust_lint_fmt"
-      # Don't run on draft pull requests
-      if: ${{ !github.event.pull_request.draft }}
-      runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: packages/rust-bindings
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-          with:
-            submodules: recursive
-        - name: Install Rust
-          uses: actions-rs/toolchain@v1
-          with:
-            profile: minimal
-            toolchain: ${{ env.RUST_CLIPPY }}
-            override: true
-            target: ${{ env.TARGET }}
-            components: rustfmt, clippy
-        - name: Clippy
-          run: |
-            git config --global url."https://github.com/".insteadOf "git@github.com:"
-            cargo clippy --color=always --tests --benches -- -Dclippy::all
+    steps:
+      - uses: actions/checkout@v2
+        with:
+            submodules: "recursive"
+
+      - uses: actions/setup-node@v2
+        with:
+            node-version: "{{ env.NODE_VERSION }}"
+            cache: yarn
+
+      - name: Get dependencies
+        run: yarn install --immutable --immutable-cache
+
+      - name: Lint
+        run: yarn lint
+
+  common_test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    defaults:
+      run:
+        working-directory: packages/common
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "{{ env.NODE_VERSION }}"
+          cache: yarn
+
+      - name: Get dependencies
+        run: yarn install --immutable --immutable-cache
+
+      - name: Cache rust
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            packages/rust-bindings/target/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install rust
+        run: rustup default {{ env.RUST_CLIPPY }}
+
+      - name: Get wasm-pack
+        uses: jetli/wasm-pack-action@v0.3.0
+        with:
+          version: 'latest'
+
+      - name: build rust-bindings
+        run: yarn build:rust-bindings --dev
+
+      - name: generate grpc
+        run: mkdir grpc; yarn generate
+
+      - name: test
+        run: yarn test
+
+  rust_lint_fmt:
+    name: rust:lint:fmt
+    # Don't run on draft pull requests
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/rust-bindings
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache rust
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            packages/rust-bindings/target/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_FMT }}
+          override: true
+          components: rustfmt
+
+      - name: Format
+        run: |
+          cargo fmt -- --color=always --check
+
+  rust_lint_clippy:
+    name: rust:lint:clippy
+    needs: "rust_lint_fmt"
+    # Don't run on draft pull requests
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/rust-bindings
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Cache rust
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            packages/rust-bindings/target/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.RUST_CLIPPY }}
+          override: true
+          target: ${{ env.TARGET }}
+          components: rustfmt, clippy
+
+      - name: Clippy
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          cargo clippy --color=always --tests --benches -- -Dclippy::all

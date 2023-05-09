@@ -41,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Get dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install --immutable
 
       - name: Install rust
         run: rustup default ${{ env.RUST_CLIPPY }}

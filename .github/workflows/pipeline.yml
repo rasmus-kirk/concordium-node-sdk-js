@@ -86,6 +86,11 @@ jobs:
             ./node_modules/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock, **/Cargo.lock') }}
 
+      - name: Get dependencies
+        run: yarn install --immutable
+
+      - run: du ./
+
       - name: typecheck (examples-1f5c57?)
         run: yarn workspace examples-1f5c57 typecheck
 

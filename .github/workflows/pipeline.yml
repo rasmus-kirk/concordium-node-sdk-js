@@ -53,7 +53,7 @@ jobs:
             ./packages/web/lib
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock') }}
 
-      - run: du ./packages/rust-bindings
+      - run: du .
 
       - name: Get dependencies
         run: yarn install --immutable
@@ -69,7 +69,7 @@ jobs:
       - name: Build
         run: yarn build:ci
 
-      - run: du ./packages/rust-bindings
+      - run: du .
 
   typecheck-examples:
     runs-on: ${{ env.UBUNTU_VERSION }}

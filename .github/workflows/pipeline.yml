@@ -18,7 +18,7 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: "${{ env.UBUNTU_VERSION }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -72,7 +72,7 @@ jobs:
       - run: du .
 
   typecheck-examples:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: "${{ env.UBUNTU_VERSION }}"
     needs: build
 
     steps:
@@ -105,7 +105,7 @@ jobs:
         run: yarn workspace examples-1f5c57 typecheck
 
   lint:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: "${{ env.UBUNTU_VERSION }}"
     needs: build
 
     steps:
@@ -144,7 +144,7 @@ jobs:
         run: yarn lint
 
   common_test:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: "${{ env.UBUNTU_VERSION }}"
     needs: build
     defaults:
       run:
@@ -180,7 +180,7 @@ jobs:
     name: rust:lint:fmt
     # Don't run on draft pull requests
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: "${{ env.UBUNTU_VERSION }}"
     defaults:
       run:
         working-directory: packages/rust-bindings
@@ -199,7 +199,7 @@ jobs:
     needs: [rust_lint_fmt, build]
     # Don't run on draft pull requests
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: "${{ env.UBUNTU_VERSION }}"
     defaults:
       run:
         working-directory: packages/rust-bindings

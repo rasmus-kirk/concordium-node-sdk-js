@@ -52,7 +52,7 @@ jobs:
           version: 'latest'
 
       - name: Build
-        run: yarn build:dev
+        run: yarn build
 
   typecheck-examples:
     runs-on: ubuntu-latest
@@ -69,9 +69,9 @@ jobs:
             cache: yarn
 
       - name: Get dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install --immutable
 
-      - name: typecheck
+      - name: typecheck (examples-1f5c57?)
         run: yarn workspace examples-1f5c57 typecheck
 
   lint:
@@ -89,7 +89,7 @@ jobs:
             cache: yarn
 
       - name: Get dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install --immutable
 
       - name: Lint
         run: yarn lint
@@ -111,7 +111,7 @@ jobs:
           cache: yarn
 
       - name: Get dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install --immutable
 
       - name: Cache rust
         uses: actions/cache@v3
@@ -203,7 +203,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{ env.RUST_CLIPPY }}
+          toolchain: 1.62
           override: true
           target: ${{ env.TARGET }}
           components: rustfmt, clippy

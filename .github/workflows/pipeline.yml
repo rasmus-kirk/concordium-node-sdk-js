@@ -40,6 +40,8 @@ jobs:
             ./packages/rust-bindings/target/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
+      - run: du ./packages/rust-bindings
+
       - name: Get dependencies
         run: yarn install --immutable
 

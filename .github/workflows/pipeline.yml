@@ -185,7 +185,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain
+        uses: dtolnay/rust-toolchain@b44cb146d03e8d870c57ab64b80f04586349ca5d
         with:
           toolchain: ${{ env.RUST_FMT }}
 
@@ -218,7 +218,9 @@ jobs:
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@${{ env.RUST_FMT }}
+        uses: dtolnay/rust-toolchain@b44cb146d03e8d870c57ab64b80f04586349ca5d
+        with:
+          toolchain: ${{ env.RUST_FMT }}
 
       - name: Clippy
         run: |

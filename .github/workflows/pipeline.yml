@@ -82,8 +82,7 @@ jobs:
       - name: Cache yarn
         uses: actions/cache@v3
         with:
-          path: |
-            ./node_modules/
+          path: ./node_modules/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock, **/Cargo.lock') }}
 
       - name: Get dependencies
@@ -111,8 +110,7 @@ jobs:
       - name: Cache yarn
         uses: actions/cache@v3
         with:
-          path: |
-            ./node_modules/
+          path: ./node_modules/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock, **/Cargo.lock') }}
 
       - name: Lint
@@ -134,6 +132,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: Cache yarn
+        uses: actions/cache@v3
+        with:
+          path: ./node_modules/
+          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock, **/Cargo.lock') }}
+
+      - name: Get dependencies
+        run: yarn install --immutable
+
       - name: test
         run: yarn test
 
@@ -149,16 +156,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Cache rust
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            ./packages/rust-bindings/target/
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
-
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -168,8 +165,7 @@ jobs:
           components: rustfmt
 
       - name: Format
-        run: |
-          cargo fmt -- --color=always --check
+        run: cargo fmt -- --color=always --check
 
   rust_lint_clippy:
     name: rust:lint:clippy

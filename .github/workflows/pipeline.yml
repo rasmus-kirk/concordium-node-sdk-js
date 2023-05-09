@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with: 
@@ -70,7 +70,7 @@ jobs:
       - run: du .
 
   typecheck-examples:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v3
@@ -102,7 +102,7 @@ jobs:
         run: yarn workspace examples-1f5c57 typecheck
 
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v3
@@ -140,7 +140,7 @@ jobs:
         run: yarn lint
 
   common_test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build
     defaults:
       run:
@@ -176,7 +176,7 @@ jobs:
     name: rust:lint:fmt
     # Don't run on draft pull requests
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: packages/rust-bindings
@@ -189,6 +189,9 @@ jobs:
         with:
           toolchain: ${{ env.RUST_FMT }}
 
+      - name: Install formatter
+        run: rustup component add rustfmt
+
       - name: Format
         run: cargo fmt -- --color=always --check
 
@@ -197,7 +200,7 @@ jobs:
     needs: [rust_lint_fmt, build]
     # Don't run on draft pull requests
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: packages/rust-bindings

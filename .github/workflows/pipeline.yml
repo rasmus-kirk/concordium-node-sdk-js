@@ -37,7 +37,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            packages/rust-bindings/target/
+            ./packages/rust-bindings/target/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Get dependencies
@@ -56,7 +56,6 @@ jobs:
 
   typecheck-examples:
     runs-on: ubuntu-latest
-    needs: [build]
 
     steps:
       - uses: actions/checkout@v2
@@ -76,7 +75,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: [build]
 
     steps:
       - uses: actions/checkout@v2
@@ -120,7 +118,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            packages/rust-bindings/target/
+            ./packages/rust-bindings/target/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install rust
@@ -159,7 +157,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            packages/rust-bindings/target/
+            ./packages/rust-bindings/target/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Rust
@@ -196,7 +194,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            packages/rust-bindings/target/
+            ./packages/rust-bindings/target/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Rust

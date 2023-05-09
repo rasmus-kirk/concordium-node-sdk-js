@@ -124,7 +124,7 @@ jobs:
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install rust
-        run: rustup default {{ env.RUST_CLIPPY }}
+        run: rustup default ${{ env.RUST_CLIPPY }}
 
       - name: Get wasm-pack
         uses: jetli/wasm-pack-action@v0.3.0
@@ -203,7 +203,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.62
+          toolchain: ${{ env.RUST_VERSION }}
           override: true
           target: ${{ env.TARGET }}
           components: rustfmt, clippy

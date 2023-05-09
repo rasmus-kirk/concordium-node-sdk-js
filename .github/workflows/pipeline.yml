@@ -21,11 +21,11 @@ jobs:
     runs-on: ${{ env.UBUNTU_VERSION }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with: 
           submodules: "recursive"
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -73,12 +73,12 @@ jobs:
 
   typecheck-examples:
     runs-on: ${{ env.UBUNTU_VERSION }}
-    needs: [build]
+    needs: build
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
             node-version: ${{ env.NODE_VERSION }}
             cache: yarn
@@ -106,12 +106,12 @@ jobs:
 
   lint:
     runs-on: ${{ env.UBUNTU_VERSION }}
-    needs: [build]
+    needs: build
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
             node-version: ${{ env.NODE_VERSION }}
             cache: yarn
@@ -145,14 +145,14 @@ jobs:
 
   common_test:
     runs-on: ${{ env.UBUNTU_VERSION }}
-    needs: [build]
+    needs: build
     defaults:
       run:
         working-directory: packages/common
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
@@ -186,15 +186,10 @@ jobs:
         working-directory: packages/rust-bindings
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.RUST_FMT }}
-          override: true
-          components: rustfmt
+        uses: dtolnay/rust-toolchain@${{ env.RUST_FMT }}
 
       - name: Format
         run: cargo fmt -- --color=always --check
@@ -210,7 +205,7 @@ jobs:
         working-directory: packages/rust-bindings
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with: 
           submodules: "recursive"
 
@@ -225,13 +220,7 @@ jobs:
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.RUST_VERSION }}
-          override: true
-          target: ${{ env.TARGET }}
-          components: rustfmt, clippy
+        uses: dtolnay/rust-toolchain@${{ env.RUST_FMT }}
 
       - name: Clippy
         run: |

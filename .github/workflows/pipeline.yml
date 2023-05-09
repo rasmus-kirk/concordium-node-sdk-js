@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ~/node_modules/
+            ./node_modules/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock') }}
 
       - run: du ./packages/rust-bindings
@@ -62,6 +62,8 @@ jobs:
 
       - name: Build
         run: yarn build:ci
+
+      - run: du ./packages/rust-bindings
 
   typecheck-examples:
     runs-on: ubuntu-latest
@@ -81,7 +83,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ~/node_modules/
+            ./node_modules/
           key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock') }}
 
       - name: typecheck (examples-1f5c57?)

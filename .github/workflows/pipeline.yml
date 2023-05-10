@@ -1,4 +1,4 @@
-name: Build and lint
+name: Build, lint and typecheck examples
  
 on:
     # Triggers the workflow on push or pull request events but only for the main branch
@@ -6,6 +6,7 @@ on:
         branches: [main, release**]
     pull_request:
         branches: [main, release**]
+        types: [ready_for_review]
 
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
@@ -126,7 +127,7 @@ jobs:
       #      ./packages/web/lib
       #    key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
 
-      - name: Lint
+      - name: Install dependencies
         run: yarn install --immutable
 
       - name: Lint

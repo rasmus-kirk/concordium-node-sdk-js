@@ -6,18 +6,19 @@ on:
         branches: [main, release**]
     pull_request:
         branches: [main, release**]
-        types: [ready_for_review]
-
+        # Don't run on draft PR's, see: https://github.com/orgs/community/discussions/25722#discussioncomment-3248917
+        types: [opened, synchronize, reopened, ready_for_review]
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
 
 env:
   NODE_VERSION: 18.16.0
-  RUST_VERSION: nightly-2022-06-09-x86_64-unknown-linux-gnu #1.62
+  RUST_VERSION: 1.62
   RUST_FMT: nightly-2022-06-09-x86_64-unknown-linux-gnu
 
 jobs:
   build:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +30,16 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      - name: Cache build-output
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./node_modules/@concordium
+            ./packages/rust-bindings/pkg
+            ./packages/common/lib
+            ./packages/nodejs/lib
+          key: ${{ runner.os }}-build_output-${{ hashFiles('**/*.ts', '**/yarn.lock', '.git/modules/deps/concordium-base/HEAD', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
+
       - name: Cache rust
         uses: actions/cache@v3
         with:
@@ -39,19 +50,14 @@ jobs:
             ./packages/rust-bindings/target/
           key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Cache yarn
-        id: cache-yarn
+      - name: Cache GRPC
+        id: cache-grpc
         uses: actions/cache@v3
         with:
           path: |
-            ./node_modules
-            ./packages/rust-bindings/pkg
             ./packages/common/grpc
-            ./packages/common/lib
             ./packages/nodejs/grpc
-            ./packages/nodejs/lib
-            ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
+          key: ${{ runner.os }}-grpc-${{ hashFiles('.git/modules/deps/concordium-base/HEAD') }}
 
       - name: Get dependencies
         run: yarn install --immutable
@@ -65,7 +71,7 @@ jobs:
           version: 'latest'
 
       - name: Build GRPC bindings
-        if: steps.cache-yarn.outputs.cache-hit != 'true'
+        if: steps.cache-grpc.outputs.cache-hit != 'true'
         run: |
           yarn workspace @concordium/common-sdk generate
           yarn workspace @concordium/node-sdk generate
@@ -76,26 +82,35 @@ jobs:
   typecheck-examples:
     runs-on: ubuntu-latest
     needs: build
+    if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
-      - name: Cache yarn
+      - name: Cache build-output
         uses: actions/cache@v3
         with:
           path: |
-            ./node_modules
+            ./node_modules/@concordium
             ./packages/rust-bindings/pkg
-            ./packages/common/grpc
             ./packages/common/lib
-            ./packages/nodejs/grpc
             ./packages/nodejs/lib
-            ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
+          key: ${{ runner.os }}-build_output-${{ hashFiles('**/*.ts', '**/yarn.lock', '.git/modules/deps/concordium-base/HEAD', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
+
+      - name: Cache GRPC
+        id: cache-grpc
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/common/grpc
+            ./packages/nodejs/grpc
+          key: ${{ runner.os }}-grpc-${{ hashFiles('.git/modules/deps/concordium-base/HEAD') }}
 
       - name: Get dependencies
         run: yarn install --immutable
@@ -105,27 +120,16 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    #needs: build
+    if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
-
-      #- name: Cache yarn
-      #  uses: actions/cache@v3
-      #  with:
-      #    path: |
-      #      ./node_modules
-      #      ./packages/rust-bindings/pkg
-      #      ./packages/common/grpc
-      #      ./packages/common/lib
-      #      ./packages/nodejs/grpc
-      #      ./packages/nodejs/lib
-      #      ./packages/web/lib
-      #    key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -136,29 +140,40 @@ jobs:
   common_test:
     runs-on: ubuntu-latest
     needs: build
+    if: github.event.pull_request.draft == false
     defaults:
       run:
         working-directory: packages/common
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
-      - name: Cache yarn
+      - name: Cache build-output
         uses: actions/cache@v3
         with:
           path: |
-            ./node_modules
+            ./node_modules/@concordium
             ./packages/rust-bindings/pkg
-            ./packages/common/grpc
             ./packages/common/lib
-            ./packages/nodejs/grpc
             ./packages/nodejs/lib
-            ./packages/web/lib
-          key: ${{ runner.os }}-home_and_target-${{ hashFiles('**/yarn.lock', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
+          key: ${{ runner.os }}-build_output-${{ hashFiles('**/yarn.lock', '.git/modules/deps/concordium-base/HEAD', './packages/rust-bindings/Cargo.lock', '.packages/rust-bindings/src/*.rs') }}
+
+      - name: Cache GRPC
+        id: cache-grpc
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./packages/common/grpc
+            ./packages/nodejs/grpc
+          key: ${{ runner.os }}-grpc-${{ hashFiles('.git/modules/deps/concordium-base/HEAD') }}
+
+      - run: du ../..
 
       - name: Get dependencies
         run: yarn install --immutable
@@ -168,6 +183,7 @@ jobs:
 
   rust_lint_fmt:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     defaults:
       run:
         working-directory: packages/rust-bindings
@@ -184,8 +200,9 @@ jobs:
         run: cargo fmt -- --color=always --check
 
   rust_lint_clippy:
-    needs: rust_lint_fmt
     runs-on: ubuntu-latest
+    needs: rust_lint_fmt
+    if: github.event.pull_request.draft == false
     defaults:
       run:
         working-directory: packages/rust-bindings

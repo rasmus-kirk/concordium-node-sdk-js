@@ -56,9 +56,15 @@ jobs:
         run: yarn install --immutable
 
       - name: Run Tests
-        run: yarn test
+        run: yarn typedoc
 
-  deploy:
+      - name: Store typedoc
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: build-output
+          path: typedoc
+
+  deploy-typedoc:
     needs: build-typedoc
     environment:
       name: github-pages
@@ -67,6 +73,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Get typedoc
+        uses: ./.github/actions/download-artifact
+        with:
+          name: typedoc
 
       - name: Setup Pages
         uses: actions/configure-pages@v3

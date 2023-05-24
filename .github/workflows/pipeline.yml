@@ -30,18 +30,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
-      - name: Store build-output
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-output
-          path: |
-            ./node_modules/@concordium
-            ./packages/rust-bindings/pkg
-            ./packages/common/lib
-            ./packages/nodejs/lib
-            ./packages/common/grpc
-            ./packages/nodejs/grpc
-
       - name: Cache GRPC
         id: cache-grpc
         uses: actions/cache@v3
@@ -86,6 +74,18 @@ jobs:
 
       - name: Build
         run: yarn build:dev
+
+      - name: Store build-output
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-output
+          path: |
+            ./node_modules/@concordium
+            ./packages/rust-bindings/pkg
+            ./packages/common/lib
+            ./packages/nodejs/lib
+            ./packages/common/grpc
+            ./packages/nodejs/grpc
 
   typecheck-examples:
     runs-on: ubuntu-22.04

@@ -76,7 +76,7 @@ jobs:
         run: yarn build:dev
 
       - name: Store build-output
-        uses: actions/upload-artifact@v3
+        uses: ./.github/actions/upload-artifact
         with:
           name: build-output
           path: |
@@ -93,8 +93,6 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:
@@ -102,7 +100,7 @@ jobs:
           cache: yarn
 
       - name: Get build-output
-        uses: actions/download-artifact@v3
+        uses: ./.github/actions/download-artifact
         with:
           name: build-output
 
@@ -121,8 +119,6 @@ jobs:
         working-directory: packages/common
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:
@@ -130,7 +126,7 @@ jobs:
           cache: yarn
 
       - name: Get build-output
-        uses: actions/download-artifact@v3
+        uses: ./.github/actions/download-artifact
         with:
           name: build-output
 
@@ -145,8 +141,6 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:
@@ -164,8 +158,6 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: "recursive"
 
       - uses: actions/setup-node@v3
         with:

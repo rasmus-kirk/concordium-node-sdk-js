@@ -71,7 +71,7 @@ const client = createConcordiumClient(
     const sunnyWeather = { Sunny: [] };
     const rainyWeather = { Rainy: [] };
 
-    const walletFile = readFileSync(cli.flags.walletExport, 'utf8');
+    const walletFile = readFileSync(cli.flags.walletFile, 'utf8');
     const wallet = parseWallet(walletFile);
     const sender = new AccountAddress(wallet.value.address);
     const signer = buildAccountSigner(wallet);

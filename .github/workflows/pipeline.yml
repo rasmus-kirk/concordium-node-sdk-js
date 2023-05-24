@@ -43,9 +43,8 @@ jobs:
         id: cache-webPack
         uses: actions/cache@v3
         with:
-          path: |
-            ./packages/web/.webpack-cache
-          key: ${{ runner.os }}-webpack }}
+          path: ./packages/web/.webpack-cache
+          key: ${{ runner.os }}-webpack
 
       - name: Get dependencies
         run: yarn install --immutable
@@ -86,6 +85,12 @@ jobs:
             ./packages/nodejs/lib
             ./packages/common/grpc
             ./packages/nodejs/grpc
+
+      - name: Always update webpack cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./packages/web/.webpack-cache
+          key: ${{ runner.os }}-webpack
 
   typecheck-examples:
     runs-on: ubuntu-22.04

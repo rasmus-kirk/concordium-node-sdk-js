@@ -61,7 +61,7 @@ jobs:
       - name: Store typedoc
         uses: ./.github/actions/upload-artifact
         with:
-          name: build-output
+          name: typedoc
           path: typedoc
 
   deploy-typedoc:

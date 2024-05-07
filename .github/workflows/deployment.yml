@@ -163,17 +163,19 @@ jobs:
 
             - name: Extract tag name
               id: get_tag
-              run: echo "TAG_NAME=${GITHUB_REF#refs/tags/sdk/}" >> $GITHUB_ENV
+              run: echo "::set-output name=tag_name::${GITHUB_REF#refs/tags/sdk/}"
 
             - name: Print tag name
-              run: echo "$TAG_NAME"
+              run: echo "The extracted tag name is ${{ steps.get_tag.outputs.tag_name }}"
 
             - name: Test that tag version matches package.json version
-              run: test "$TAG_NAME" = $(jq -r ".version" packages/sdk/package.json) || exit 1
+              run: test "${{ steps.get_tag.outputs.tag_name }}" = $(jq -r ".version" packages/sdk/package.json) || exit 1
 
             - name: Create a GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  tag: sdk/v${{ env.TAG_NAME }}
+                  tag: sdk/v${{ steps.get_tag.outputs.tag_name }}
                   draft: true
-                  name: SDK Release v${{ env.TAG_NAME }}
+                  name: SDK Release v${{ steps.get_tag.outputs.tag_name }}
+
+            - 

@@ -119,3 +119,8 @@ jobs:
                   artifacts: |
                       packages/*
                   draft: true
+
+            - name: Publish to NPM
+              run: npm publish --workspace packages/rust-bindings
+              env:
+                  NODE_AUTH_TOKEN: '${{secrets.NPM_TOKEN}}'

@@ -151,7 +151,7 @@ jobs:
               uses: actions/deploy-pages@v2
 
     upload-release:
-        #needs: build-typedoc
+        needs: build
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -163,17 +163,23 @@ jobs:
 
             - name: Extract tag name
               id: get_tag
-              run: echo "::set-output name=tag_name::${GITHUB_REF#refs/tags/sdk/}"
-
-            - name: Print tag name
-              run: echo "The extracted tag name is ${{ steps.get_tag.outputs.tag_name }}"
+              run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/sdk/}"
 
             - name: Test that tag version matches package.json version
-              run: test "${{ steps.get_tag.outputs.tag_name }}" = $(jq -r ".version" packages/sdk/package.json) || exit 1
+              run: test "${{ steps.get_tag.outputs.tag }}" = "$(jq -r ".version" packages/sdk/package.json)" || exit 1
+
+            - name: Get build-output
+              uses: actions/download-artifact@v4
+              with:
+                  path: packages
+                  name: build-release
 
             - name: Create a GitHub release
               uses: ncipollo/release-action@v1
               with:
                   tag: sdk/v${{ steps.get_tag.outputs.tag_name }}
-                  draft: true
                   name: SDK Release v${{ steps.get_tag.outputs.tag_name }}
+                  files: |
+                      packages/*
+                  draft: true
+                  fail_on_unmatched_files: true

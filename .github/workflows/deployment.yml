@@ -153,6 +153,8 @@ jobs:
     upload-release:
         #needs: build-typedoc
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4

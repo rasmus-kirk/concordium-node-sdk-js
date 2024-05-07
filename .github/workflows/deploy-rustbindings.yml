@@ -116,7 +116,6 @@ jobs:
               with:
                   tag: rust-bindings/v${{ steps.get_tag.outputs.tag_name }}
                   name: Rust-Bindings Release v${{ steps.get_tag.outputs.tag_name }}
-                  files: |
+                  artifacts: |
                       packages/*
                   draft: true
-                  fail_on_unmatched_files: true

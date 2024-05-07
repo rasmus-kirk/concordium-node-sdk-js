@@ -116,7 +116,6 @@ jobs:
               with:
                   tag: ccd-js-gen/v${{ steps.get_tag.outputs.tag_name }}
                   name: CCD-JS-Gen Release v${{ steps.get_tag.outputs.tag_name }}
-                  files: |
+                  artifacts: |
                       packages/*
                   draft: true
-                  fail_on_unmatched_files: true

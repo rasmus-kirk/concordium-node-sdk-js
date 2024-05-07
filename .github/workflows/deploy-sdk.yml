@@ -123,7 +123,9 @@ jobs:
                   path: typedoc
 
     deploy-typedoc:
-        needs: build-typedoc
+        needs: 
+            - build-typedoc
+            - upload-release
         environment:
             name: github-pages
             url: ${{ steps.deployment.outputs.page_url }}
@@ -179,7 +181,6 @@ jobs:
               with:
                   tag: sdk/v${{ steps.get_tag.outputs.tag_name }}
                   name: SDK Release v${{ steps.get_tag.outputs.tag_name }}
-                  files: |
+                  artifacts: |
                       packages/*
                   draft: true
-                  fail_on_unmatched_files: true

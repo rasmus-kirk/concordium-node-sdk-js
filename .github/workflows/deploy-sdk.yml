@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy SDK
 
 on:
     # Run automatically on tag push

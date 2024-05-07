@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy ccd-js-gen
 
 on:
     # Run automatically on tag push

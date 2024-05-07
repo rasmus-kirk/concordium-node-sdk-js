@@ -172,6 +172,6 @@ jobs:
             - name: Create a GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  tag: releases/templates/v${{ env.TAG_NAME }}
+                  tag: sdk/v${{ env.TAG_NAME }}
                   draft: true
-                  name: Template Release v${{ env.TAG_NAME }}
+                  name: SDK Release v${{ env.TAG_NAME }}

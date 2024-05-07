@@ -145,3 +145,18 @@ jobs:
             - name: Deploy to GitHub Pages
               id: deployment
               uses: actions/deploy-pages@v2
+
+    upload-release:
+        needs: build-typedoc
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Save latest release tag
+              runs: echo "LATEST_TAG_REF=$(git describe --abbrev=0 --tags --match releases/templates/*)" >> $GITHUB_ENV
+
+            - name: print latest release tag
+              runs: echo "$LATEST_TAG_REF"

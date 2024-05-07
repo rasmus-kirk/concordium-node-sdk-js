@@ -11,7 +11,6 @@ on:
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
 
-
 env:
     DUMMY: 3 # For cache busting.
     NODE_VERSION: 18.16.0

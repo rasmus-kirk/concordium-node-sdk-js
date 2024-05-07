@@ -169,3 +169,9 @@ jobs:
             - name: Test that tag version matches package.json version
               run: test "$TAG_NAME" = $(jq -r ".version" packages/sdk/package.json) || exit 1
 
+            - name: Create a GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: releases/templates/v${{ env.TAG_NAME }}
+                  draft: true
+                  name: Template Release v${{ env.TAG_NAME }}

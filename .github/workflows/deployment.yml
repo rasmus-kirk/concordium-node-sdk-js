@@ -3,7 +3,8 @@ name: Deploy
 on:
     # Run automatically on tag push
     push:
-        tags: sdk/*
+        tags: 
+            - sdk/*
     # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
 
@@ -150,7 +151,7 @@ jobs:
               uses: actions/deploy-pages@v2
 
     upload-release:
-        needs: build-typedoc
+        #needs: build-typedoc
         runs-on: ubuntu-latest
         steps:
             - name: Checkout sources

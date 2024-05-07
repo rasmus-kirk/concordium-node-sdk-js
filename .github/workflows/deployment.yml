@@ -1,6 +1,9 @@
 name: Deploy
 
 on:
+    # Run automatically on tag push
+    push:
+        tags: sdk/*
     # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
 
@@ -155,8 +158,9 @@ jobs:
               with:
                   submodules: recursive
 
-            - name: Save latest release tag
-              runs: echo "LATEST_TAG_REF=$(git describe --abbrev=0 --tags --match releases/templates/*)" >> $GITHUB_ENV
+            - name: Extract tag name
+              id: get_tag
+              run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-            - name: print latest release tag
-              runs: echo "$LATEST_TAG_REF"
+            - name: Print tag name
+              run: echo "$TAG_NAME"

@@ -199,3 +199,11 @@ jobs:
               env:
                   NPM_CONFIG_USERCONFIG: ./.npmrc
                   NODE_AUTH_TOKEN: '${{secrets.NPM_TOKEN}}'
+
+            - name: Archive npm failure logs
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                name: npm-logs
+                path: ~/.npm/_logs
+

@@ -74,6 +74,8 @@ jobs:
             - name: Build release
               run: yarn build
 
+            - run: ls -la
+
             - name: Store build-release
               uses: actions/upload-artifact@v4
               with:
@@ -185,6 +187,8 @@ jobs:
                   artifacts: |
                       packages/*
                   draft: true
+
+            - run: ls -la
 
             - name: Publish to NPM
               run: npm publish --workspace packages/sdk

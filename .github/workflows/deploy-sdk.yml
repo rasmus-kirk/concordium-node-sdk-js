@@ -197,4 +197,5 @@ jobs:
             - name: Publish to NPM
               run: npm publish --workspace packages/sdk
               env:
+                  NPM_CONFIG_USERCONFIG: ./.npmrc
                   NODE_AUTH_TOKEN: '${{secrets.NPM_TOKEN}}'

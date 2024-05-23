@@ -74,9 +74,25 @@ jobs:
             - name: Build release
               run: yarn build
 
-            - run: ls -la
+            - name: Setup .yarnrc.yml
+              run: |
+                yarn config set npmRegistryServer "https://npm.pkg.github.com"
+                yarn config set npmAlwaysAuth true
+                yarn config set npmAuthToken $NPM_AUTH_TOKEN
+              env:
+                NPM_AUTH_TOKEN: test_val_here
 
             - run: cat .yarnrc.yml
+
+            - name: Publish to NPM
+              run: yarn workspace @concordium/web-sdk npm publish
+
+            - name: Archive npm failure logs
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                name: npm-logs
+                path: ~/.npm/_logs
 
             - name: Store build-release
               uses: actions/upload-artifact@v4

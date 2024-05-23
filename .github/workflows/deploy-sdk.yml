@@ -168,14 +168,6 @@ jobs:
               with:
                   submodules: recursive
 
-            - run: rm .yarnrc.yml
-
-            - uses: actions/setup-node@v3
-              with:
-                  registry-url: https://registry.npmjs.org
-                  node-version: ${{ env.NODE_VERSION }}
-                  cache: yarn
-
             - name: Extract tag name
               id: get_tag
               run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/sdk/}"

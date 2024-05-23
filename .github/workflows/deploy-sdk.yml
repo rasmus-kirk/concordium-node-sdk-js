@@ -192,6 +192,14 @@ jobs:
 
             - run: ls -la
 
+            - name: Setup .yarnrc.yml
+              run: |
+                yarn config set npmScopes.my-org.npmRegistryServer "https://npm.pkg.github.com"
+                yarn config set npmScopes.my-org.npmAlwaysAuth true
+                yarn config set npmScopes.my-org.npmAuthToken $NPM_AUTH_TOKEN
+              env:
+                NPM_AUTH_TOKEN: test_val_here
+
             - run: cat .yarnrc.yml
 
             - name: Publish to NPM

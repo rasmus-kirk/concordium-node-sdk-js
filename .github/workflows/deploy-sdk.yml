@@ -198,6 +198,10 @@ jobs:
                   node-version: ${{ env.NODE_VERSION }}
                   cache: yarn
 
+            - name: Get dependencies
+              if: steps.yarn-cache.outputs.cache-hit != 'true'
+              run: yarn install --immutable
+
             - name: Setup .yarnrc.yml
               run: |
                 yarn config set npmRegistryServer "https://npm.pkg.github.com"
